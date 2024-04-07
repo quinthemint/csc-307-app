@@ -4,7 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "cd packages/react-frontend && vite",
+  "build": "cd packages/react-frontend && vite build",
+  "lint": "cd packages/react-frontend && eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+  "preview": "cd packages/react-frontend && vite preview"
   },
   "author": "",
   "license": "ISC",

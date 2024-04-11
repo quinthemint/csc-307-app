@@ -1,9 +1,11 @@
 // backend.js
 import express from "express";
+import cors from "cors";
 
 const app = express();
 const port = 8000;
 
+app.use(cors());
 app.use(express.json());
 
 app.get("/", (req, res) => {
@@ -64,18 +66,14 @@ const users = {
     let result;
     if (name && job) {
         result = findUserByNameAndJob(name, job);
+        res.send({ users_list: result });
     } else if (name) {
         result = findUserByName(name);
-    } else {
-        result = users;
-    }
-
-    if (result.length > 0) {
         res.send({ users_list: result });
     } else {
-        res.status(404).send("Resource not found.");
+        res.send(users)
     }
-    
+
   });
   
   const findUserById = (id) =>
@@ -101,3 +99,9 @@ const addUser = (user) => {
     addUser(userToAdd);
     res.send();
   });
+
+  app.delete("/users/:id", (req, res) => {
+    const id = req.params["id"];
+    users["users_list"] = users["users_list"].filter(user => user.id !== id);
+
+})

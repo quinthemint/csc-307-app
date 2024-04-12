@@ -1,5 +1,5 @@
 // backend.js
-import express from "express";
+import express, { json } from "express";
 import cors from "cors";
 
 const app = express();
@@ -93,15 +93,26 @@ const addUser = (user) => {
     users["users_list"].push(user);
     return user;
   };
+
+const genID = () => {
+    const ID = Math.floor(Math.random() * 1000);
+    if (findUserById(ID) != undefined){
+        genID()
+    }
+
+    return ID
+}
   
   app.post("/users", (req, res) => {
     const userToAdd = req.body;
+    userToAdd["id"] = genID()
     addUser(userToAdd);
-    res.status(201).send();
+    res.status(201).send(json);
   });
 
   app.delete("/users/:id", (req, res) => {
     const id = req.params["id"];
     users["users_list"] = users["users_list"].filter(user => user.id !== id);
+    res.status(204).send()
 
 })

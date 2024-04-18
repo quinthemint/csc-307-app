@@ -95,9 +95,9 @@ const addUser = (user) => {
   };
 
 const genID = () => {
-    const ID = Math.floor(Math.random() * 1000);
+    const ID = String(Math.floor(Math.random() * 100000));
     if (findUserById(ID) != undefined){
-        genID()
+        return genID()
     }
 
     return ID
@@ -107,11 +107,11 @@ const genID = () => {
     const userToAdd = req.body;
     userToAdd["id"] = genID()
     addUser(userToAdd);
-    res.status(201).send(json);
+    res.status(201).send(userToAdd);
   });
 
   app.delete("/users/:id", (req, res) => {
-    const id = req.params["id"];
+    const id = req.params["id"]
     users["users_list"] = users["users_list"].filter(user => user.id !== id);
     res.status(204).send()
 

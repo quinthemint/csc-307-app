@@ -6,28 +6,25 @@ import Form from "./Form";
 function MyApp() {
     const [characters, setCharacters] = useState([]);
 
-      function removeOneCharacter(person) {
-        removeUser(person)
-        .then((res) => {if (res.status != 204) 
-          throw new Error("Failed to remove from list");
-          return res.json})
-        .then(() => {
-          const updated = characters.filter((character) => {
-          return character !== person;
-        })
-         setCharacters(updated);
-      }).catch((error) => {
-        console.log(error);
-      })
-      }
+    function removeOneCharacter(index) {
+      const person = characters[index];
+      removeUser(person)
+          .then(response => {
+              if (response.status !== 204) {
+                  throw new Error('Failed to remove from list');
+              }
+              const updatedCharacters = characters.filter((character, idx) => idx !== index);
+              setCharacters(updatedCharacters);
+          })
+          .catch(error => {
+              console.error('Error:', error.message);
+          });
+  }
 
       function removeUser(person) {
-        const promise = fetch("Http://localhost:8000/users", {
+        console.log(person)
+        const promise = fetch(`http://localhost:8000/users/${person.id}`, {
           method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(person),
         });
     
         return promise;
@@ -37,8 +34,8 @@ function MyApp() {
         postUser(person)
           .then((res) => {if (res.status != 201) 
                           throw new Error("Failed to add to list");
-                          return res.json})
-          .then(() => setCharacters([...characters, person]))
+                          return res.json()})
+          .then((newPerson) => setCharacters([...characters, newPerson]))
           .catch((error) => {
             console.log(error);
           })
@@ -57,7 +54,7 @@ function MyApp() {
     }, [] );
 
     function postUser(person) {
-      const promise = fetch("Http://localhost:8000/users", {
+      const promise = fetch("http://localhost:8000/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

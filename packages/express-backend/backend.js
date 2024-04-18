@@ -112,6 +112,9 @@ const genID = () => {
 
   app.delete("/users/:id", (req, res) => {
     const id = req.params["id"]
+    if (findUserById(id) == undefined){
+        res.status(404).send()
+    }
     users["users_list"] = users["users_list"].filter(user => user.id !== id);
     res.status(204).send()
 

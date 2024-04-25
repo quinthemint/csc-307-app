@@ -1,6 +1,6 @@
 // backend.js
 import express, { json } from "express";
-import { addUser, getUsers, findUserById, findUserByName, findUserByJob } from './models/user-services';
+import userService from './models/user-services.js';
 import cors from "cors";
 
 const app = express();
@@ -19,90 +19,48 @@ app.listen(port, () => {
   );
 });
 
-const users = {
-    users_list: [
-      {
-        id: "xyz789",
-        name: "Charlie",
-        job: "Janitor"
-      },
-      {
-        id: "abc123",
-        name: "Mac",
-        job: "Bouncer"
-      },
-      {
-        id: "ppp222",
-        name: "Mac",
-        job: "Professor"
-      },
-      {
-        id: "yat999",
-        name: "Dee",
-        job: "Aspring actress"
-      },
-      {
-        id: "zap555",
-        name: "James",
-        job: "Bartender"
-      }
-    ]
-  };
-
-  const findUserByNameAndJob = (name, job) => {
-    return users["users_list"].filter(
-      (user) => (user["name"] === name) && (user["job"] === job)
-    );
-  };
-
-  app.get("/users", (req, res) => {
+  app.get("/users", async (req, res) => {
     const { name, job } = req.query;
-    
-    let result;
-    if (name && job) {
-        result = findUserByNameAndJob(name, job);
-        res.send({ users_list: result });
-    } else if (name) {
-        result = findUserByName(name);
-        res.send({ users_list: result });
-    } else {
-        res.send(users)
+  
+    try {
+      let result = await userService.getUsers(name, job);
+      if (!result || result.length === 0) {
+        res.status(404).send("No users found.");
+      } else {
+        res.status(200).json(result);
+      }
+    } catch (error) {
+      res.status(500).send("Server error occurred.");
     }
-
   });
 
-app.get("/users/:id", (req, res) => {
-  const id = req.params["id"]; //or req.params.id
-  let result = findUserById(id);
+app.get("/users/:id", async (req, res) => {
+  const id = req.params["id"]; 
+  let result = await userService.findUserById(id);
   if (result === undefined) {
-    res.status(404).send("Resource not found.");
+    res.status(404).send("user not found.");
   } else {
-    res.send(result);
+    res.status(200).json(result);
   }
 });
 
-const genID = () => {
-    const ID = String(Math.floor(Math.random() * 100000));
-    if (findUserById(ID) != undefined){
-        return genID()
-    }
+app.post("/users", async (req, res) => {
+  try {
+      const savedUser = await userService.addUser(req.body);  
+      res.status(201).json(savedUser); 
+  } catch (error) {
+      res.status(500).send({ message: "Failed to save user", error: error.message });
+  }
+});
 
-    return ID
-}
-  
-  app.post("/users", (req, res) => {
-    const userToAdd = req.body;
-    userToAdd["id"] = genID()
-    addUser(userToAdd);
-    res.status(201).send(userToAdd);
-  });
-
-  app.delete("/users/:id", (req, res) => {
-    const id = req.params["id"]
-    if (findUserById(id) == undefined){
-        res.status(404).send()
-    }
-    users["users_list"] = users["users_list"].filter(user => user.id !== id);
-    res.status(204).send()
-
+  app.delete("/users/:id", async (req, res) => {
+    try {
+      const deletedUser = await userService.deleteUser(req.params.id);
+      if (!deletedUser) {
+          return res.status(404).send({ message: "User not found" });
+      }
+      res.send({ message: "User deleted", user: deletedUser });
+  } catch (error) {
+      res.status(500).send({ message: "Failed to delete user", error: error.message });
+  }
 })

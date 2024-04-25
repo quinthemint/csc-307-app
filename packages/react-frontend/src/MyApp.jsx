@@ -22,48 +22,52 @@ function MyApp() {
   }
 
       function removeUser(person) {
-        console.log(person)
-        const promise = fetch(`http://localhost:8000/users/${person.id}`, {
-          method: "DELETE",
+        return fetch(`http://localhost:8000/users/${person._id}`, {
+          method: "DELETE"
         });
-    
-        return promise;
       }
 
       function updateList(person) { 
         postUser(person)
-          .then((res) => {if (res.status != 201) 
-                          throw new Error("Failed to add to list");
-                          return res.json()})
-          .then((newPerson) => setCharacters([...characters, newPerson]))
-          .catch((error) => {
-            console.log(error);
-          })
+            .then((res) => {
+                if (!res.ok) {
+                    throw new Error(`Failed to add to list: ${res.status}`);
+                }
+                return res.json();
+            })
+            .then((newPerson) => {
+                setCharacters(prevCharacters => [...prevCharacters, newPerson]); 
+            })
+            .catch((error) => {
+                console.error("Error adding user:", error);
+            });
     }
 
-      function fetchUsers() {
-        const promise = fetch("http://localhost:8000/users");
-        return promise;
-    }
+    function fetchUsers() {
+      return fetch("http://localhost:8000/users")
+             .then((response) => {
+                 if (!response.ok) {
+                     throw new Error('Network response was not ok: ' + response.statusText);
+                 }
+                 return response.json();
+             });
+  }
 
     useEffect(() => {
       fetchUsers()
-        .then((res) => res.json())
-        .then((json) => setCharacters(json["users_list"]))
+        .then((userlist) => setCharacters(userlist))
         .catch((error) => { console.log(error); });
     }, [] );
 
     function postUser(person) {
-      const promise = fetch("http://localhost:8000/users", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(person),
+      return fetch("http://localhost:8000/users", {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json",
+          },
+          body: JSON.stringify(person)
       });
-  
-      return promise;
-    }
+  }
 
   return (
   <div className="container">

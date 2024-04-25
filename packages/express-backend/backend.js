@@ -1,5 +1,6 @@
 // backend.js
 import express, { json } from "express";
+import { addUser, getUsers, findUserById, findUserByName, findUserByJob } from './models/user-services';
 import cors from "cors";
 
 const app = express();
@@ -48,12 +49,6 @@ const users = {
     ]
   };
 
-  const findUserByName = (name) => {
-    return users["users_list"].filter(
-      (user) => user["name"] === name
-    );
-  };
-
   const findUserByNameAndJob = (name, job) => {
     return users["users_list"].filter(
       (user) => (user["name"] === name) && (user["job"] === job)
@@ -75,9 +70,6 @@ const users = {
     }
 
   });
-  
-  const findUserById = (id) =>
-  users["users_list"].find((user) => user["id"] === id);
 
 app.get("/users/:id", (req, res) => {
   const id = req.params["id"]; //or req.params.id
@@ -88,11 +80,6 @@ app.get("/users/:id", (req, res) => {
     res.send(result);
   }
 });
-
-const addUser = (user) => {
-    users["users_list"].push(user);
-    return user;
-  };
 
 const genID = () => {
     const ID = String(Math.floor(Math.random() * 100000));
